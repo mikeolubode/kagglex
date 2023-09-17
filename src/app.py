@@ -1,10 +1,15 @@
 import chainlit as cl
+from dotenv import load_dotenv
+from langchain.document_loaders import ConfluenceLoader
+
+# built-in modules
 import requests
 import os
 
 confluence_url = "https://mikesofts.atlassian.net/"
-email = os.environ['confluence_user']
-api_token = os.environ['confluence_api_token']
+load_dotenv()
+email = os.environ['EMAIL']
+api_token = os.environ['API_TOKEN']
 
 # Set headers for authentication
 headers = {
@@ -14,7 +19,7 @@ headers = {
 
 # Provide your email and API token for basic authentication
 auth = (email, api_token)
-# print(auth)
+
 @cl.on_message
 async def main(message: str):
     # Your custom logic goes here...
