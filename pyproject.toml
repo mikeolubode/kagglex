@@ -1,0 +1,21 @@
+[project]
+name = "chatbot"
+version = "2023.9.0"
+description = "Information Retrieval from blog"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+keywords = ["chainlit", "langchain", "confluence","api"]
+authors = [
+  {name = "Michael Olubode", email = "olubodem@gmail.com"},
+]
+
+classifiers = [
+  "Programming Language :: Python"
+]
+
+dependencies = [
+    "chainlit==0.7.0",
+    "langchain==0.0.292",
+    "python-dotenv==1.0.0"
+]
