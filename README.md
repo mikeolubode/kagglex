@@ -8,7 +8,10 @@ Dashboard to retrieve information from personal blog using an LLM.
 2. create a new environment <br>
 `python -m venv .venv`
 
-3. install dependencies <br>
+3. activate new environment <br>
+`source .venv/bin/activate`
+
+4. install dependencies from pyproject.toml<br>
 `pip install -e .`
 
 ### Usage
