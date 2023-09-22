@@ -1,6 +1,6 @@
 {
     "name": "kaggle-x-mike",
-    "image": "mcr.microsoft.com/vscode/devcontainers/python:3.10-bulleye",
+    "image": "mcr.microsoft.com/devcontainers/python:3.10-bullseye",
     "features": {
         "ghcr.io/devcontainers-contrib/features/pre-commit:2": {
             "version": "latest"
