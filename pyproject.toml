@@ -1,21 +1,31 @@
-[project]
-name = "chatbot"
+[tool.poetry]
+name = "kagglex"
 version = "2023.9.0"
 description = "Information Retrieval from blog"
+authors = ["Michael Olubode <olubodem@gmail.com>"]
 readme = "README.md"
-requires-python = ">=3.10"
-license = {file = "LICENSE"}
+
+license = "LICENSE"
 keywords = ["chainlit", "langchain", "confluence","api"]
-authors = [
-  {name = "Michael Olubode", email = "olubodem@gmail.com"},
-]
 
 classifiers = [
   "Programming Language :: Python"
 ]
 
-dependencies = [
-    "chainlit==0.7.0",
-    "langchain==0.0.292",
-    "python-dotenv==1.0.0"
-]
+[tool.poetry.dependencies]
+python = "^3.10"
+python-dotenv = "^1.0.0"
+chainlit = "^0.7.0"
+langchain = "^0.0.300"
+chromadb = "^0.4.12"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[project]
+name = "chatbot"
+version = "2023.9.0"
+requires-python = ">=3.10"

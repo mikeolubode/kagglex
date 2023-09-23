@@ -6,10 +6,10 @@
             "version": "latest"
         }
     },
-    "mounts": [
-        "source=${env:HOME}/.gitconfig,target=/home/vscode/.gitconfig,type=blind",
-        "source=${env:HOME}/.ssh,target=/home/vscode/.ssh,type=bind"
-    ],
+    // "mounts": [
+    //     "source=${env:HOME}/.gitconfig,target=/home/vscode/.gitconfig,type=blind",
+    //     "source=${env:HOME}/.ssh,target=/home/vscode/.ssh,type=bind"
+    // ],
     "postCreateCommand": ".devcontainer/post-create-command.sh",
     "customizations": {
         "vscode": {
