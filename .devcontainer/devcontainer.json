@@ -1,0 +1,26 @@
+{
+    "name": "kaggle-x-mike",
+    "image": "mcr.microsoft.com/devcontainers/python:3.10-bullseye",
+    "features": {
+        "ghcr.io/devcontainers-contrib/features/pre-commit:2": {
+            "version": "latest"
+        }
+    },
+    // "mounts": [
+    //     "source=${env:HOME}/.gitconfig,target=/home/vscode/.gitconfig,type=blind",
+    //     "source=${env:HOME}/.ssh,target=/home/vscode/.ssh,type=bind"
+    // ],
+    "postCreateCommand": ".devcontainer/post-create-command.sh",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "GitHub.copilot",
+                "esbenp.prettier-vscode",
+                "njpwerner.autodocstring",
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-toolsai.jupyter"
+            ]
+        }
+    }
+}
