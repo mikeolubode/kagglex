@@ -17,5 +17,6 @@ classifiers = [
 dependencies = [
     "chainlit==0.7.0",
     "langchain==0.0.292",
-    "python-dotenv==1.0.0"
+    "python-dotenv==1.0.0",
+    "black==23.9.1"
 ]
