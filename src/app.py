@@ -61,7 +61,8 @@ documents = load_confluence_documents(confluence_url, email, api_token, limit=-1
 texts = split_document(documents, chunk_size=100, overlap=10)
 retriever = get_retriever(embeddings, texts, persist_directory)
 
-
+# implement conversionalretrieval chain
+# google PALM, MakerSuite for LLM
 @cl.on_message
 async def main(question: str):
     documents_results = retriever.get_relevant_documents(question)
