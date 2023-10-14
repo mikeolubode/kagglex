@@ -1,20 +1,20 @@
+import os
+
 import chainlit as cl
 from dotenv import load_dotenv
+from langchain.chains import ConversationalRetrievalChain
 from langchain.document_loaders import ConfluenceLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores import Chroma
 from langchain.embeddings import GooglePalmEmbeddings
 from langchain.llms import GooglePalm
-from langchain.chains import ConversationalRetrievalChain
+from langchain.memory import ChatMessageHistory, ConversationBufferMemory
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.vectorstores import Chroma
 
-
-# built-in modules
-import os
 
 load_dotenv()
 
 
-def load_confluence_documents(url, username, CONFLUENCE_API_TOKEN, limit=-1):
+def load_confluence_documents(url, username, space_key, CONFLUENCE_API_TOKEN, limit=-1):
     # get documents from confluence
     loader = ConfluenceLoader(
         url=url,
@@ -62,35 +62,56 @@ def get_vectorstore(embeddings, texts, persist_directory):
     return cdb
 
 
-confluence_url = "https://mikesofts.atlassian.net/wiki"
-email = os.environ["EMAIL"]
-CONFLUENCE_API_TOKEN = os.environ["CONFLUENCE_API_TOKEN"]
-space_key = "~614914d4071141006ab46038"
+@cl.on_chat_start
+async def start():
+    confluence_url = "https://mikesofts.atlassian.net/wiki"
+    email = os.environ["EMAIL"]
+    CONFLUENCE_API_TOKEN = os.environ["CONFLUENCE_API_TOKEN"]
+    space_key = "~614914d4071141006ab46038"
 
-embeddings = GooglePalmEmbeddings(google_api_key=os.environ["GOOGLE_PALM_API_KEY"])
-googlepalm_llm = GooglePalm(
-    google_api_key=os.environ["GOOGLE_PALM_API_KEY"], temperature=0.1
-)
+    embeddings = GooglePalmEmbeddings(google_api_key=os.environ["GOOGLE_PALM_API_KEY"])
+    googlepalm_llm = GooglePalm(
+        google_api_key=os.environ["GOOGLE_PALM_API_KEY"], temperature=0.1
+    )
 
-persist_directory = "chroma_db"
+    persist_directory = "chroma_db"
 
-documents = load_confluence_documents(
-    confluence_url, email, CONFLUENCE_API_TOKEN, limit=-1
-)
-texts = split_document(documents, chunk_size=1000, overlap=100)
-vectorstore = get_vectorstore(embeddings, texts, persist_directory)
+    documents = load_confluence_documents(
+        confluence_url, email, space_key, CONFLUENCE_API_TOKEN, limit=-1
+    )
+    texts = split_document(documents, chunk_size=1000, overlap=100)
+    vectorstore = get_vectorstore(embeddings, texts, persist_directory)
 
-qa_chain = ConversationalRetrievalChain.from_llm(
-    googlepalm_llm,
-    retriever=vectorstore.as_retriever(),
-    verbose=False,
-    return_source_documents=True,
-)
-chat_history = []
+    message_history = ChatMessageHistory()
+
+    memory = ConversationBufferMemory(
+        memory_key="chat_history",
+        output_key="answer",
+        chat_memory=message_history,
+        return_messages=True,
+    )
+
+    chain = ConversationalRetrievalChain.from_llm(
+        googlepalm_llm,
+        retriever=vectorstore.as_retriever(),
+        memory=memory,
+        verbose=False,
+        return_source_documents=True,
+    )
+    chat_history = []
+
+    cl.user_session.set("chain", chain)
+
+    # await cl.Message(content="Hi! I am a bot").send()
 
 
 @cl.on_message
 async def main(query: str):
-    result = qa_chain({"question": query, "chat_history": chat_history})
+    chain = cl.user_session.get("chain")
+    cb = cl.AsyncLangchainCallbackHandler()
+    result = await chain.acall(query, callbacks=[cb])
+
+    # result = chain({"question": query, "chat_history": chat_history})
+    # chat_history.append((query, result["answer"]))
+    #
     await cl.Message(content=result["answer"]).send()
-    chat_history.append((query, result["answer"]))
