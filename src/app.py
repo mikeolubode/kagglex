@@ -82,7 +82,8 @@ async def start():
 
     # Load and embed documents to Chroma
     msg = cl.Message(
-        content=f"Getting the data ready. Please wait...", disable_human_feedback=True
+        content="Getting the data ready. Please wait...",
+        disable_human_feedback=True
     )
     await msg.send()
 
@@ -126,7 +127,7 @@ async def start():
 async def main(query: str):
     chain = cl.user_session.get("chain")  # type: ConversationalRetrievalChain
     cb = cl.AsyncLangchainCallbackHandler()
-    result = await chain.acall(query, callbacks=[cb])
-    # result = chain({"question": query}, callbacks=[cb])
+    # result = await chain.acall({"question": query}, callbacks=[cb])
+    result = chain({"question": query}, callbacks=[cb])
 
     await cl.Message(content=result["answer"]).send()
