@@ -31,6 +31,18 @@ GOOGLE_PALM_API_KEY = os.environ["GOOGLE_PALM_API_KEY"]
 def load_confluence_documents(
     url: str, username: str, space_key: str, CONFLUENCE_API_TOKEN: str, limit: int = -1
 ):
+    """Loads documents from confluence page
+
+    Args:
+        url (str): url of the confluence page
+        username (str): email/username of the confluence page
+        space_key (str): space key of the confluence space to extract
+        CONFLUENCE_API_TOKEN (str): api token generated from confluence
+        limit (int, optional): Limits the number of pages loaded. Defaults to -1.
+
+    Returns:
+        _type_: langchain documents
+    """
     # get documents from confluence
     loader = ConfluenceLoader(
         url=url,
@@ -58,10 +70,15 @@ def split_document(documents, chunk_size, overlap):
 def get_vectorstore(
     embeddings: Embeddings, texts: List[str], persist_directory: str
 ) -> VectorStore:
-    """
-    embeddings: text embedding model instance
-    texts: list of texts to embed
-    persist_directory: directory to persist vectors
+    """_summary_
+
+    Args:
+        embeddings (Embeddings): _description_
+        texts (List[str]): _description_
+        persist_directory (str): _description_
+
+    Returns:
+        VectorStore: _description_
     """
     # Check if the folder exists in the current working directory
     if os.path.exists(persist_directory) and os.path.isdir(persist_directory):
@@ -78,6 +95,8 @@ def get_vectorstore(
 
 @cl.on_chat_start
 async def start():
+    """_summary_
+    """
     persist_directory = "chroma_db"
 
     # Load and embed documents to Chroma
@@ -125,6 +144,11 @@ async def start():
 
 @cl.on_message
 async def main(query: str):
+    """_summary_
+
+    Args:
+        query (str): _description_
+    """
     chain = cl.user_session.get("chain")  # type: ConversationalRetrievalChain
     cb = cl.AsyncLangchainCallbackHandler()
     # result = await chain.acall({"question": query}, callbacks=[cb])
