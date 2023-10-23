@@ -18,8 +18,7 @@ python-dotenv = "^1.0.0"
 chainlit = "^0.7.0"
 langchain = "^0.0.300"
 chromadb = "^0.4.12"
-"black==23.9.1"
-"google-generativeai==0.2.1"
+google-generativeai = "^0.2.1"
 
 
 [build-system]

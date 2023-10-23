@@ -1,0 +1,8 @@
+atlassian-python-api==3.41.2
+beautifulsoup4==4.12.2
+chromadb==0.4.12
+chainlit==0.7.0
+google-generativeai==0.2.1
+langchain==0.0.300
+lxml==4.9.3
+python-dotenv==1.0.0

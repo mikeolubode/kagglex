@@ -20,7 +20,6 @@ from prompt import confluence_question_prompt
 load_dotenv()
 logger = logging.getLogger(__name__)
 
-
 CONFLUENCE_URL = "https://mikesofts.atlassian.net/wiki"
 CONFLUENCE_EMAIL = os.environ["EMAIL"]
 CONFLUENCE_API_TOKEN = os.environ["CONFLUENCE_API_TOKEN"]
@@ -95,14 +94,12 @@ def get_vectorstore(
 
 @cl.on_chat_start
 async def start():
-    """_summary_
-    """
+    """_summary_"""
     persist_directory = "chroma_db"
 
     # Load and embed documents to Chroma
     msg = cl.Message(
-        content="Getting the data ready. Please wait...",
-        disable_human_feedback=True
+        content="Getting the data ready. Please wait...", disable_human_feedback=True
     )
     await msg.send()
 
