@@ -1,11 +1,11 @@
-name: apply on merge
+name: chatbot deployment
 on: [push]
 env:
   REGION: us-central1 # TODO: update Cloud Run service region
   
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  GitHub-actions-wif:
+  dev:
     # Allow the job to fetch a GitHub ID token
     permissions:
       id-token: write
@@ -14,35 +14,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-          
-      - id: 'auth'
-        name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@v1'
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: 'Authenticate to Google Cloud'
+        id: 'auth'
+        uses: google-github-actions/auth@v0
         with:
-          create_credentials_file: true
+          token_format: 'access_token'
           workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
           
-      - name: 'Networking activities'
-        run: |-
-          gcloud auth login --brief --cred-file="${{ steps.auth.outputs.credentials_file_path }}"
-          gcloud compute firewall-rules list --format="table(
-              name,
-              network,
-              direction,
-              priority
-          )"
-        continue-on-error: true
-          
-      - id: 'deploy-cloud-run'
-        name: 'Deploy Cloud Run Hello World Python App'
-        uses: 'google-github-actions/deploy-cloudrun@v1'
+      - name: 'Docker Auth'
+        id: docker-auth
+        uses: docker/login-action@v1
         with:
-          service: 'hello-world'
-          region: 'us-central1'
+          username: 'oauth2accesstoken'
+          password: '${{ steps.auth.outputs.access_token }}'
+          registry: '${{ vars.REGION }}-docker.pkg.dev'
+          
+      - name: 'Build, tag and push container'
+        id: build-image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ vars.REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.ARTIFACT_REPO }}/${{ vars.SERVICE_NAME }}:${{ inputs.ref }}
 
-
-      - name: 'Use output'
-        run: 'curl "${{ steps.deploy-cloud-run.outputs.url }}"'
-        continue-on-error: true
