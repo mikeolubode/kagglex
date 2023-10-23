@@ -9,5 +9,7 @@ COPY ./requirements.txt /tmp
 RUN pip install -r /tmp/requirements.txt
 
 COPY ./src /app/src
+COPY .chainlit.md /app
+
 RUN ls -al
 ENTRYPOINT ["chainlit", "run", "./src/app.py", "-w"]
