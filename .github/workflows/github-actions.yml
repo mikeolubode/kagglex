@@ -1,0 +1,48 @@
+name: apply on merge
+on: [push]
+env:
+  REGION: us-central1 # TODO: update Cloud Run service region
+  
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  GitHub-actions-wif:
+    # Allow the job to fetch a GitHub ID token
+    permissions:
+      id-token: write
+      contents: read
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+          
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          create_credentials_file: true
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
+          
+      - name: 'Networking activities'
+        run: |-
+          gcloud auth login --brief --cred-file="${{ steps.auth.outputs.credentials_file_path }}"
+          gcloud compute firewall-rules list --format="table(
+              name,
+              network,
+              direction,
+              priority
+          )"
+        continue-on-error: true
+          
+      - id: 'deploy-cloud-run'
+        name: 'Deploy Cloud Run Hello World Python App'
+        uses: 'google-github-actions/deploy-cloudrun@v1'
+        with:
+          service: 'hello-world'
+          region: 'us-central1'
+
+
+      - name: 'Use output'
+        run: 'curl "${{ steps.deploy-cloud-run.outputs.url }}"'
+        continue-on-error: true
