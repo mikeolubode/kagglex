@@ -13,5 +13,4 @@ COPY ./chainlit.md /app
 
 EXPOSE 8000
 
-RUN ls -al
 ENTRYPOINT ["chainlit", "run", "./src/app.py", "-w"]
