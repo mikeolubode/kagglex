@@ -1,11 +1,10 @@
 atlassian-python-api==3.41.2
 beautifulsoup4==4.12.2
-chromadb==0.4.12
-chainlit==0.7.0
-google-generativeai==0.2.1
-langchain==0.0.300
+chromadb==0.4.15
+chainlit==0.7.4
+google-generativeai==0.2.2
+langchain==0.0.292
 lxml==4.9.3
 pypdf==3.16.4
 python-dotenv==1.0.0
 pypdf==3.0.1
-

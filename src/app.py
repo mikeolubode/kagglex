@@ -1,22 +1,21 @@
-import os
-import logging
-
-import chainlit as cl
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
+from io import BytesIO
 from langchain.chains import ConversationalRetrievalChain
 from langchain.document_loaders import ConfluenceLoader
-from langchain.embeddings.base import Embeddings
 from langchain.embeddings import GooglePalmEmbeddings
+from langchain.embeddings.base import Embeddings
 from langchain.llms import GooglePalm
 from langchain.memory import ChatMessageHistory, ConversationBufferMemory
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores.base import VectorStore
 from langchain.vectorstores import Chroma
+from langchain.vectorstores.base import VectorStore
 from prompt import confluence_question_prompt, standalone_question_prompt
 import PyPDF2
-from io import BytesIO
+import chainlit as cl
+import logging
+import os
 
-load_dotenv()
+load_dotenv(find_dotenv())
 logger = logging.getLogger(__name__)
 
 CONFLUENCE_URL = "https://mikesofts.atlassian.net/wiki"
@@ -101,11 +100,10 @@ async def get_user_vectorstore(
         VectorStore: _description_
     """
     files = None
-    while files == None:
+    while files is None:
         files = await cl.AskFileMessage(
             content="Please upload a pdf file to begin!",
             accept={"text/plain": [".pdf"]},
-            timeout=10,
             max_files=1,
         ).send()
 
@@ -165,7 +163,7 @@ async def get_sample_vectorstore(
             texts, embedding=embeddings, persist_directory=persist_directory
         )
 
-    msg.content = "Michael's Confluence chat is ready! Ask me anything about data science and machine learning!"
+    msg.content = "Now you can talk to your data! If you didn't upload any data, I have a sample data to keep you company!"
     await msg.update()
 
     return vector_db
@@ -178,15 +176,15 @@ async def start():
     embeddings = GooglePalmEmbeddings(google_api_key=GOOGLE_PALM_API_KEY)
     # Load and embed documents to Chroma
     # Wait for the user to upload a file
-    # res = await cl.AskActionMessage(
-    #     content="Pick an action!",
-    #     actions=[
-    #         cl.Action(name="Upload data", value="user_data", label="✅ custom"),
-    #         cl.Action(name="Sample data", value="sample_data", label="❌ sample"),
-    #     ],
-    # ).send()
+    res = await cl.AskActionMessage(
+        content="Pick Data source!",
+        actions=[
+            cl.Action(name="Upload", value="user_data", label="upload pdf"),
+            cl.Action(name="Sample", value="sample_data", label="sample data"),
+        ],
+    ).send()
 
-    if True:
+    if res and res.get("value") == "user_data":
         vectorstore = await get_user_vectorstore(embeddings, persist_directory)
     else:
         vectorstore = await get_sample_vectorstore(embeddings, persist_directory)
@@ -214,7 +212,7 @@ async def start():
 
 
 @cl.on_message
-async def main(query: str):
+async def main(message: cl.Message):
     """_summary_
 
     Args:
@@ -222,7 +220,6 @@ async def main(query: str):
     """
     chain = cl.user_session.get("chain")  # type: ConversationalRetrievalChain
     cb = cl.AsyncLangchainCallbackHandler()
-    # result = await chain.acall({"question": query}, callbacks=[cb])
-    result = chain({"question": query}, callbacks=[cb])
+    result = chain({"question": message.content}, callbacks=[cb])
 
     await cl.Message(content=result["answer"]).send()
