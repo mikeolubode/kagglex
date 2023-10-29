@@ -1,5 +1,10 @@
 name: chatbot deployment
-on: [push]
+on:
+  push:
+    branches:
+      - develop
+      - main
+
 env:
   REGION: us-central1 # TODO: update Cloud Run service region
   
