@@ -14,7 +14,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores.base import VectorStore
 from langchain.vectorstores import Chroma
 
-from prompt import confluence_question_prompt
+from prompt import confluence_question_prompt, standalone_question_prompt
 
 
 load_dotenv()
@@ -129,11 +129,12 @@ async def start():
         llm,
         retriever=vectorstore.as_retriever(),
         condense_question_prompt=confluence_question_prompt,
+        combine_docs_chain_kwargs={"prompt": standalone_question_prompt},
         memory=memory,
         verbose=False,
         return_source_documents=True,
     )
-    msg.content = "Michael's Confluence chat is ready! Ask me anything!"
+    msg.content = "Michael's Confluence chat is ready! Ask me anything about data science and machine learning!"
     await msg.update()
 
     cl.user_session.set("chain", chain)
