@@ -1,4 +1,4 @@
-FROM docker.io/python:3.10-slim-bookworm
+FROM docker.io/python:3.10.13-slim-bullseye
 
 RUN mkdir /app
 
