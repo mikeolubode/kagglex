@@ -13,7 +13,7 @@ from langchain.memory import ChatMessageHistory, ConversationBufferMemory
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores.base import VectorStore
 from langchain.vectorstores import Chroma
-
+from langchain.document_loaders import PyPDFLoader
 from prompt import confluence_question_prompt, standalone_question_prompt
 
 
@@ -66,6 +66,18 @@ def split_document(documents, chunk_size, overlap):
     return texts
 
 
+def split_user_text(user_texts, chunk_size, overlap):
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=overlap,
+        length_function=len,
+        add_start_index=True,
+        separators=["\n\n", "\n", "(?<=\. )", " ", ""],
+    )
+    texts = text_splitter.split_text(user_texts)
+    return texts
+
+
 def get_vectorstore(
     embeddings: Embeddings, texts: List[str], persist_directory: str
 ) -> VectorStore:
@@ -98,19 +110,34 @@ async def start():
     persist_directory = "chroma_db"
 
     # Load and embed documents to Chroma
-    msg = cl.Message(
-        content="Getting the data ready. Please wait...", disable_human_feedback=True
-    )
-    await msg.send()
+    # Wait for the user to upload a file
+    try:
+        files = None
+        while files == None:
+            files = await cl.AskFileMessage(
+                content="Please upload a pdf file to begin!",
+                accept={"text/plain": [".pdf"]},
+                timeout=10,
+            ).send()
 
-    documents = load_confluence_documents(
-        CONFLUENCE_URL,
-        CONFLUENCE_EMAIL,
-        CONFLUENCE_SPACE_KEY,
-        CONFLUENCE_API_TOKEN,
-        limit=-1,
-    )
-    texts = split_document(documents, chunk_size=1000, overlap=100)
+        # Decode the file
+        loader = PyPDFLoader(files)
+        user_documents = loader.load_and_split()
+        texts = split_user_text(user_documents)
+    except TimeoutError:
+        msg = cl.Message(
+            content="User provided no data. Loading sample data...",
+            disable_human_feedback=True,
+        )
+        await msg.send()
+        documents = load_confluence_documents(
+            CONFLUENCE_URL,
+            CONFLUENCE_EMAIL,
+            CONFLUENCE_SPACE_KEY,
+            CONFLUENCE_API_TOKEN,
+            limit=-1,
+        )
+        texts = split_document(documents, chunk_size=1000, overlap=100)
 
     embeddings = GooglePalmEmbeddings(google_api_key=GOOGLE_PALM_API_KEY)
     vectorstore = get_vectorstore(embeddings, texts, persist_directory)
