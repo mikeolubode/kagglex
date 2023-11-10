@@ -1,5 +1,5 @@
 ### Chatbot
-Dashboard to retrieve information from personal blog using an LLM.
+Dashboard to conversationally retrieve information from user-provided document using an LLM.
 
 ### Installation
 1. clone repo <br>
@@ -11,8 +11,11 @@ Dashboard to retrieve information from personal blog using an LLM.
 3. activate new environment <br>
 `source .venv/bin/activate`
 
-4. install dependencies from pyproject.toml<br>
-`pip install -e .`
+4. install dependencies<br>
+`pip install -r requirements.txt`
+
+5. set up the following environment variables
+EMAIL, GOOGLE_PALM_API_KEY and CONFLUENCE_API_TOKEN
 
 ### Usage
 Run application `chainlit run src/app.py -w`
